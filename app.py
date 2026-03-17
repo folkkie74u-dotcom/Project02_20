@@ -28,90 +28,67 @@ segment_names = {
 st.title("🧠 Customer Segmentation App")
 
 # -------------------------
-# Visualization section
+# Create two columns
 # -------------------------
 
-st.header("📊 Customer Segment Distribution")
-
-try:
-    df = pd.read_csv("dataset/segmented_customers.csv")
-
-    # Map segment numbers to names
-    df['Segment_Name'] = df['Segment'].map(segment_names)
-
-    fig, ax = plt.subplots()
-
-    df['Segment_Name'].value_counts().reindex(segment_names.values()).plot(
-        kind='bar',
-        ax=ax
-    )
-
-    ax.set_xlabel("Segment")
-    ax.set_ylabel("Number of Customers")
-    ax.set_title("Customer Count by Segment")
-
-    st.pyplot(fig)
-
-except FileNotFoundError:
-    st.warning("Dataset not found. Please check dataset/segmented_customers.csv")
+col1, col2 = st.columns(2)
 
 # -------------------------
-# Prediction section
+# LEFT SIDE (Visualization)
 # -------------------------
 
-st.header("🔍 Predict Segment")
+with col1:
 
-with st.form("predict_form"):
+    st.header("📊 Customer Segment Distribution")
 
-    income = st.number_input(
-        "Income",
-        min_value=0,
-        help="Monthly income in dollars"
-    )
+    try:
+        df = pd.read_csv("dataset/segmented_customers.csv")
 
-    kids = st.slider(
-        "Number of Kids",
-        0,
-        3
-    )
+        df['Segment_Name'] = df['Segment'].map(segment_names)
 
-    teens = st.slider(
-        "Number of Teens",
-        0,
-        3
-    )
+        fig, ax = plt.subplots()
 
-    recency = st.number_input(
-        "Recency",
-        min_value=0,
-        help="Days since last purchase"
-    )
+        df['Segment_Name'].value_counts().reindex(segment_names.values()).plot(
+            kind='bar',
+            ax=ax
+        )
 
-    wines = st.number_input(
-        "Monthly Wine Spend",
-        min_value=0
-    )
+        ax.set_xlabel("Segment")
+        ax.set_ylabel("Number of Customers")
+        ax.set_title("Customer Count by Segment")
 
-    fruits = st.number_input(
-        "Monthly Fruit Spend",
-        min_value=0
-    )
+        st.pyplot(fig)
 
-    submitted = st.form_submit_button("Predict Segment")
+    except FileNotFoundError:
+        st.warning("Dataset not found.")
 
-    if submitted:
+# -------------------------
+# RIGHT SIDE (Prediction)
+# -------------------------
 
-        try:
+with col2:
+
+    st.header("🔍 Predict Segment")
+
+    with st.form("predict_form"):
+
+        income = st.number_input("Income", min_value=0)
+        kids = st.slider("Number of Kids", 0, 3)
+        teens = st.slider("Number of Teens", 0, 3)
+        recency = st.number_input("Recency", min_value=0)
+        wines = st.number_input("Monthly Wine Spend", min_value=0)
+        fruits = st.number_input("Monthly Fruit Spend", min_value=0)
+
+        submitted = st.form_submit_button("Predict Segment")
+
+        if submitted:
 
             if income == 0 or recency == 0:
                 st.warning("Please fill in all required fields")
-
             else:
 
                 data = [[income, kids, teens, recency, wines, fruits]]
-
                 data_scaled = scaler.transform(data)
-
                 segment = model.predict(data_scaled)
 
                 segment_label = segment_names.get(segment[0], "Unknown")
@@ -119,7 +96,3 @@ with st.form("predict_form"):
                 st.success(
                     f"Predicted Customer Segment: {segment_label} ({segment[0]})"
                 )
-
-        except Exception as e:
-
-            st.error(f"Prediction failed: {e}")
