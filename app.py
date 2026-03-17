@@ -31,7 +31,7 @@ st.title("🧠 Customer Segmentation App")
 # Create two columns
 # -------------------------
 
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([2, 1])
 
 # -------------------------
 # LEFT SIDE (Visualization)
