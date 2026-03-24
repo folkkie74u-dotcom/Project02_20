@@ -11,15 +11,18 @@ model = pickle.load(open('model/kmeans_model.pkl', 'rb'))
 scaler = pickle.load(open('model/scaler.pkl', 'rb'))
 
 # -------------------------
-# Segment name mapping
+# Segment mapping (แก้ให้ตรง logic ธุรกิจ)
 # -------------------------
 
 segment_names = {
-    0: "Normal",
+    0: "Loyal",
     1: "Premium",
-    2: "Young",
-    3: "Loyal"
+    2: "Normal",
+    3: "Young"
 }
+
+# ลำดับสำหรับแสดงผล (ตรง Power BI)
+segment_order = ["Loyal", "Premium", "Normal", "Young"]
 
 # -------------------------
 # App title
@@ -44,11 +47,13 @@ with col1:
     try:
         df = pd.read_csv("dataset/segmented_customers.csv")
 
+        # Map segment name
         df['Segment_Name'] = df['Segment'].map(segment_names)
 
+        # Plot
         fig, ax = plt.subplots()
 
-        df['Segment_Name'].value_counts().reindex(segment_names.values()).plot(
+        df['Segment_Name'].value_counts().reindex(segment_order).plot(
             kind='bar',
             ax=ax
         )
@@ -58,6 +63,10 @@ with col1:
         ax.set_title("Customer Count by Segment")
 
         st.pyplot(fig)
+
+        # 🔥 Debug (ดูค่าเฉลี่ยแต่ละกลุ่ม)
+        with st.expander("🔍 Cluster Profile (Debug)"):
+            st.write(df.groupby('Segment_Name').mean())
 
     except FileNotFoundError:
         st.warning("Dataset not found.")
@@ -83,6 +92,7 @@ with col2:
 
         if submitted:
 
+            # ตรวจ input
             if income == 0 or recency == 0:
                 st.warning("Please fill in all required fields")
             else:
